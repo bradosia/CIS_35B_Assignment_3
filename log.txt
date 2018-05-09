@@ -166,3 +166,17 @@ May 05, 2018 12:01:56 AM exception.Log error
 WARNING: #500: Automobile added conficts with another automobile
 May 05, 2018 12:01:56 AM exception.Log error
 WARNING: #500: Automobile added conficts with another automobile
+May 07, 2018 8:06:56 PM exception.Log warning
+WARNING: #102: Missing name attribute for option in the automobile text file
+May 07, 2018 8:06:56 PM exception.Log warning
+WARNING: #102: Missing name attribute for option in the automobile text file
+May 07, 2018 8:06:56 PM exception.Log warning
+WARNING: #102: Missing name attribute for option in the automobile text file
+May 07, 2018 8:06:56 PM exception.Log error
+WARNING: #500: Automobile added conficts with another automobile
+May 07, 2018 8:06:56 PM exception.Log error
+WARNING: #500: Automobile added conficts with another automobile
+May 07, 2018 8:06:56 PM exception.Log error
+WARNING: #500: Automobile added conficts with another automobile
+May 07, 2018 8:06:56 PM exception.Log error
+WARNING: #500: Automobile added conficts with another automobile

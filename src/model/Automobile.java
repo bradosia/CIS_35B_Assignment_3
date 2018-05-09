@@ -7,12 +7,14 @@
 package model;
 
 import java.lang.ArrayIndexOutOfBoundsException;
+import java.util.*;
 
 public class Automobile implements java.io.Serializable {
 	private static final long serialVersionUID = 1362422403381823640L;
 	private String makeName, modelName, packageName, typeName, year;
 	private double basePrice; // double is not an exact decimal.
 	private OptionSet optionSetList[];
+	//ArrayList<OptionSet> optionSetList;
 	private int optionSetListListLength;
 
 	/*
@@ -30,6 +32,7 @@ public class Automobile implements java.io.Serializable {
 		typeName = "";
 		year = "";
 		basePrice = 0;
+		//optionSetList = new ArrayList<OptionSet>(size);
 		optionSetList = new OptionSet[size];
 		optionSetListListLength = 0;
 		for (int i = 0; i < size; i++)

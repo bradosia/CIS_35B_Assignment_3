@@ -2,6 +2,7 @@ package exception;
 
 import java.util.logging.*;
 import java.io.*;
+import java.text.DateFormat;
 
 public class Log {
 	Logger logger;
@@ -35,6 +36,13 @@ public class Log {
 	}
 	
 	public void warning(String str) {
+		/*try {
+			DateFormat d1 = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+			Date date = new Date();
+			PrintWriter writer = new PrintWriter(new BufferedWriter(new File Writer()));
+			writer.println("[" + d1.format(date) + "] " + errlog);
+			writer.close();
+		}*/
 		try {
 			// configure the logger with handler and formatter
 			fh = new FileHandler("log.txt", true);
