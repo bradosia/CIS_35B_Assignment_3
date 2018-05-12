@@ -4,7 +4,7 @@ import model.*;
 import exception.*;
 
 public abstract class ProxyAutomobile {
-	private model.AutomobileTable automobileTable;
+	private static model.AutomobileTable automobileTable;
 	private util.FileIO autoutil;
 
 	ProxyAutomobile() {

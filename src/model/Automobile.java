@@ -12,44 +12,31 @@ import java.util.*;
 public class Automobile implements java.io.Serializable {
 	private static final long serialVersionUID = 1362422403381823640L;
 	private String makeName, modelName, packageName, typeName, year;
+	private int key; // make-model-year
 	private double basePrice; // double is not an exact decimal.
-	private OptionSet optionSetList[];
-	//ArrayList<OptionSet> optionSetList;
-	private int optionSetListListLength;
+	ArrayList<OptionSet> optionSetList;
+	// private int optionSetListListLength;
 
 	/*
 	 * Constructor
 	 */
 	public Automobile() {
-		/*
-		 * We don't know the size so let's just make it size 10 and resize it later if
-		 * need be It would have been nice to use a List<>
-		 */
-		int size = 20;
-		makeName = "";
-		modelName = "";
-		packageName = "";
-		typeName = "";
-		year = "";
-		basePrice = 0;
-		//optionSetList = new ArrayList<OptionSet>(size);
-		optionSetList = new OptionSet[size];
-		optionSetListListLength = 0;
-		for (int i = 0; i < size; i++)
-			optionSetList[i] = new OptionSet();
+		init();
+		optionSetList = new ArrayList<OptionSet>();
 	}
 
 	public Automobile(int size) {
+		init();
+		optionSetList = new ArrayList<OptionSet>(20);
+	}
+
+	public void init() {
 		makeName = "";
 		modelName = "";
 		packageName = "";
 		typeName = "";
 		year = "";
 		basePrice = 0;
-		optionSetList = new OptionSet[size];
-		optionSetListListLength = 0;
-		for (int i = 0; i < size; i++)
-			optionSetList[i] = new OptionSet();
 	}
 
 	/*
@@ -85,7 +72,7 @@ public class Automobile implements java.io.Serializable {
 	public OptionSet getOptionSet(int index) {
 		OptionSet optionSetObject = null;
 		try {
-			optionSetObject = optionSetList[index];
+			optionSetObject = optionSetList.get(index);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -95,7 +82,7 @@ public class Automobile implements java.io.Serializable {
 	}
 
 	public int length() {
-		return optionSetListListLength;
+		return optionSetList.size();
 	}
 
 	/*
@@ -104,9 +91,9 @@ public class Automobile implements java.io.Serializable {
 	// Find OptionSet with name
 	public OptionSet findOptionSet(String name) {
 		OptionSet optionSetObject = null;
-		for (int i = 0; i < optionSetList.length; i++) {
-			if (optionSetList[i].getName() == name) {
-				optionSetObject = optionSetList[i];
+		for (int i = 0; i < optionSetList.size(); i++) {
+			if (optionSetList.get(i).getName() == name) {
+				optionSetObject = optionSetList.get(i);
 			}
 		}
 		return optionSetObject;
@@ -151,9 +138,8 @@ public class Automobile implements java.io.Serializable {
 	}
 
 	public int setOptionSet(String name) {
-		OptionSet optionSetObject = getOptionSet(optionSetListListLength);
-		optionSetObject.setName(name);
-		return optionSetListListLength++;
+		optionSetList.add(new OptionSet(name, 10));
+		return length();
 	}
 
 	public boolean setOptionSetName(String optionSetName, String nameNew) {
@@ -171,7 +157,7 @@ public class Automobile implements java.io.Serializable {
 		int indexReturn = -1;
 		OptionSet optionSetObject = getOptionSet(indexSet);
 		indexReturn = optionSetObject.setOption(name, price_);
-		// we set the 
+		// we set the
 		if (optionSetObject.getName().equals("Make")) {
 			setMake(name);
 		} else if (optionSetObject.getName().equals("Model")) {
@@ -231,39 +217,32 @@ public class Automobile implements java.io.Serializable {
 				.append(getModel()).append(" and Base Price: $").append(getPrice());
 		stringBufferObject.append(System.getProperty("line.separator"));
 		for (i = 0; i < n; i++) {
-			stringBufferObject.append(optionSetList[i].toString()).append(System.getProperty("line.separator"));
+			stringBufferObject.append(optionSetList.get(i).toString()).append(System.getProperty("line.separator"));
 		}
 		return stringBufferObject.toString();
 	}
 
 	protected class OptionSet implements java.io.Serializable {
 		private static final long serialVersionUID = 5846223453457830887L;
-		private Option optionList[];
+		ArrayList<Option> optionList;
 		private String optionSetName;
-		private int optionListLength;
 
 		/*
 		 * Constructor
 		 */
 		protected OptionSet() {
-			/*
-			 * We don't know the size so let's just make it size 12 and resize it later if
-			 * need be It would have been nice to use a List<>
-			 */
-			int size = 12;
-			optionList = new Option[size];
-			optionSetName = "";
-			optionListLength = 0;
-			for (int i = 0; i < size; i++)
-				optionList[i] = new Option();
+			init();
+			optionList = new ArrayList<Option>();
 		}
 
 		protected OptionSet(String name, int size) {
-			optionList = new Option[size];
+			init();
 			optionSetName = name;
-			optionListLength = 0;
-			for (int i = 0; i < size; i++)
-				optionList[i] = new Option();
+			optionList = new ArrayList<Option>(12);
+		}
+
+		protected void init() {
+			optionSetName = "";
 		}
 
 		/*
@@ -277,7 +256,7 @@ public class Automobile implements java.io.Serializable {
 		protected Option getOption(int index) {
 			Option optionObject = null;
 			try {
-				optionObject = optionList[index];
+				optionObject = optionList.get(index);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -285,7 +264,7 @@ public class Automobile implements java.io.Serializable {
 		}
 
 		protected int length() {
-			return optionListLength;
+			return optionList.size();
 		}
 
 		/*
@@ -294,10 +273,10 @@ public class Automobile implements java.io.Serializable {
 		// Find Option with name (in context of OptionSet)
 		protected Option findOptionSet(String name) {
 			Option optionObject = null;
-			for (int i = 0; i < optionList.length; i++) {
+			for (int i = 0; i < optionList.size(); i++) {
 				try {
-					if (optionList[i].getName() == name) {
-						optionObject = optionList[i];
+					if (optionList.get(i).getName() == name) {
+						optionObject = optionList.get(i);
 					}
 				} catch (NullPointerException e) {
 					/*
@@ -320,10 +299,8 @@ public class Automobile implements java.io.Serializable {
 
 		// Set values of Option (in context of OptionSet)
 		protected int setOption(String name, double price_) {
-			Option optionObject = getOption(optionListLength);
-			optionObject.setName(name);
-			optionObject.setPrice(price_);
-			return optionListLength++;
+			optionList.add(new Option(name, price_));
+			return optionList.size();
 		}
 
 		/*
