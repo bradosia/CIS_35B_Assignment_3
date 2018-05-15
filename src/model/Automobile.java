@@ -9,13 +9,15 @@ package model;
 import java.lang.ArrayIndexOutOfBoundsException;
 import java.util.*;
 
+import exception.AutoException;
+
 public class Automobile implements java.io.Serializable {
 	private static final long serialVersionUID = 1362422403381823640L;
 	private String makeName, modelName, packageName, typeName, year;
 	private int key; // make-model-year
 	private double basePrice; // double is not an exact decimal.
 	ArrayList<OptionSet> optionSetList;
-	// private int optionSetListListLength;
+	ArrayList<Integer> optionSetOptionSelect;
 
 	/*
 	 * Constructor
@@ -23,11 +25,13 @@ public class Automobile implements java.io.Serializable {
 	public Automobile() {
 		init();
 		optionSetList = new ArrayList<OptionSet>();
+		optionSetOptionSelect = new ArrayList<Integer>();
 	}
 
 	public Automobile(int size) {
 		init();
 		optionSetList = new ArrayList<OptionSet>(20);
+		optionSetOptionSelect = new ArrayList<Integer>(20);
 	}
 
 	public void init() {
@@ -49,14 +53,6 @@ public class Automobile implements java.io.Serializable {
 
 	public String getModel() {
 		return modelName;
-	}
-
-	public String getPackage() {
-		return packageName;
-	}
-
-	public String getType() {
-		return typeName;
 	}
 
 	public String getYear() {
@@ -85,6 +81,30 @@ public class Automobile implements java.io.Serializable {
 		return optionSetList.size();
 	}
 
+	public OptionSet.Option getOptionSetOptionChoice(String optionSetName) {
+		OptionSet.Option returnValue = null;
+		int optionSetIndex;
+		try {
+			optionSetIndex = findOptionSetIndex(optionSetName);
+			returnValue = getOptionSetOption(optionSetIndex);
+		} catch (exception.AutoException e) {
+			// nothing
+		}
+		return returnValue;
+	}
+
+	public OptionSet.Option getOptionSetOption(int optionSetIndex) throws AutoException {
+		OptionSet.Option returnValue = null;
+		int optionIndex;
+		try {
+			optionIndex = optionSetOptionSelect.get(optionSetIndex).intValue();
+			returnValue = getOptionSet(optionSetIndex).getOption(optionIndex);
+		} catch (NullPointerException e) {
+			throw new exception.AutoException(102);
+		}
+		return returnValue;
+	}
+
 	/*
 	 * Find
 	 */
@@ -108,6 +128,74 @@ public class Automobile implements java.io.Serializable {
 		return optionObject;
 	}
 
+	public int findOptionSetIndex(String name) throws AutoException {
+		int i, n;
+		n = optionSetList.size();
+		for (i = 0; i < n; i++) {
+			if (optionSetList.get(i).getName() == name) {
+				break;
+			}
+		}
+		if (i == n) {
+			throw new exception.AutoException(102);
+		}
+		return i;
+	}
+
+	public int findOptionSetOptionIndex(String optionSetName, String optionName) {
+		int returnIndex = -1;
+		OptionSet optionSetObject = findOptionSet(optionSetName);
+		if (optionSetObject != null) {
+			returnIndex = optionSetObject.findOptionSetIndex(optionName);
+		}
+		return returnIndex;
+	}
+
+	/*
+	 * add new optionSet
+	 * 
+	 * @param OptionSetName optionSet name
+	 */
+	public int addOptionSet(String OptionSetName) {
+		optionSetList.add(new OptionSet(OptionSetName, 10));
+		return length();
+	}
+
+	/*
+	 * Add option by optionSet Index
+	 * 
+	 * @post option added
+	 * 
+	 * @param optionSetIndex optionSet index
+	 * 
+	 * @param optionName name of added option
+	 * 
+	 * @param optionPrice price of added option
+	 */
+	public int addOptionSetOption(int optionSetIndex, String optionName, double optionPrice) {
+		int indexReturn = -1;
+		OptionSet optionSetObject = getOptionSet(optionSetIndex);
+		indexReturn = optionSetObject.addOption(optionName, optionPrice);
+		// we set the
+		if (optionSetObject.getName().equals("Make")) {
+			setMake(optionName);
+		} else if (optionSetObject.getName().equals("Model")) {
+			setModel(optionName);
+		} else if (optionSetObject.getName().equals("Year")) {
+			setYear(optionName);
+		} else if (optionSetObject.getName().equals("Retail Price")) {
+			/*
+			 * Price may be set by either Retail Price: 18445 or Retail Price: /18445
+			 */
+			if (optionName.equals("")) {
+				setPrice(optionPrice);
+			} else {
+				setPrice(Double.parseDouble(optionName));
+			}
+		}
+		return indexReturn;
+	}
+
 	/*
 	 * Setter
 	 */
@@ -120,14 +208,6 @@ public class Automobile implements java.io.Serializable {
 		modelName = name;
 	}
 
-	public void setPackage(String name) {
-		packageName = name;
-	}
-
-	public void setType(String name) {
-		typeName = name;
-	}
-
 	public void setYear(String name) {
 		year = name;
 	}
@@ -135,11 +215,6 @@ public class Automobile implements java.io.Serializable {
 	// Set Base Price
 	public void setPrice(double price_) {
 		basePrice = price_;
-	}
-
-	public int setOptionSet(String name) {
-		optionSetList.add(new OptionSet(name, 10));
-		return length();
 	}
 
 	public boolean setOptionSetName(String optionSetName, String nameNew) {
@@ -152,35 +227,9 @@ public class Automobile implements java.io.Serializable {
 		return returnValue;
 	}
 
-	// Set values of OptionSet
-	public int setOptionSetOption(int indexSet, String name, double price_) {
-		int indexReturn = -1;
-		OptionSet optionSetObject = getOptionSet(indexSet);
-		indexReturn = optionSetObject.setOption(name, price_);
-		// we set the
-		if (optionSetObject.getName().equals("Make")) {
-			setMake(name);
-		} else if (optionSetObject.getName().equals("Model")) {
-			setModel(name);
-		} else if (optionSetObject.getName().equals("Package")) {
-			setPackage(name);
-		} else if (optionSetObject.getName().equals("Type")) {
-			setType(name);
-		} else if (optionSetObject.getName().equals("Year")) {
-			setYear(name);
-		} else if (optionSetObject.getName().equals("Retail Price")) {
-			/*
-			 * Price may be set by either Retail Price: 18445 or Retail Price: /18445
-			 */
-			if (name.equals("")) {
-				setPrice(price_);
-			} else {
-				setPrice(Double.parseDouble(name));
-			}
-		}
-		return indexReturn;
-	}
-
+	/*
+	 * Set option set option name
+	 */
 	public boolean setOptionSetOptionName(String optionSetName, String optionName, String nameNew) {
 		boolean returnValue = false;
 		OptionSet.Option optionObject = findOptionSetOption(optionSetName, optionName);
@@ -197,6 +246,30 @@ public class Automobile implements java.io.Serializable {
 		if (optionObject != null) {
 			optionObject.setPrice(priceNew);
 			returnValue = true;
+		}
+		return returnValue;
+	}
+
+	public boolean setOptionSetOption(int optionSetIndex, int optionIndex) throws AutoException {
+		boolean returnValue = false;
+		try {
+			optionSetOptionSelect.set(optionSetIndex, optionIndex);
+		} catch (IndexOutOfBoundsException e) {
+			throw new exception.AutoException(100);
+		}
+		return returnValue;
+	}
+
+	public boolean setOptionSetOptionChoice(String optionSetName, String optionName) {
+		boolean returnValue = false;
+		int optionSetIndex, optionIndex;
+		try {
+			optionSetIndex = findOptionSetIndex(optionSetName);
+			optionIndex = findOptionSetOptionIndex(optionSetName, optionName);
+			setOptionSetOption(optionSetIndex, optionIndex);
+			returnValue = true;
+		} catch (exception.AutoException e) {
+			// nothing
 		}
 		return returnValue;
 	}
@@ -252,13 +325,15 @@ public class Automobile implements java.io.Serializable {
 			return optionSetName;
 		}
 
-		// Get OptionSet (by index value)
-		protected Option getOption(int index) {
+		/*
+		 * get option by option index
+		 */
+		protected Option getOption(int optionIndex) throws AutoException {
 			Option optionObject = null;
 			try {
-				optionObject = optionList.get(index);
-			} catch (Exception e) {
-				e.printStackTrace();
+				optionObject = optionList.get(optionIndex);
+			} catch (IndexOutOfBoundsException e) {
+				throw new exception.AutoException(100);
 			}
 			return optionObject;
 		}
@@ -290,6 +365,26 @@ public class Automobile implements java.io.Serializable {
 			return optionObject;
 		}
 
+		protected int findOptionSetIndex(String name) {
+			int i, n;
+			n = optionList.size();
+			for (i = 0; i < n; i++) {
+				try {
+					if (optionList.get(i).getName() == name) {
+						break;
+					}
+				} catch (NullPointerException e) {
+					/*
+					 * According to Carnegie Mellon University Software Engineering Institute You
+					 * should not catch a null pointer exception. BUT WE WILL FOR THE SAKE OF THE
+					 * ASSIGNMENT!
+					 */
+					break;
+				}
+			}
+			return i;
+		}
+
 		/*
 		 * Setter
 		 */
@@ -297,9 +392,15 @@ public class Automobile implements java.io.Serializable {
 			optionSetName = name;
 		}
 
-		// Set values of Option (in context of OptionSet)
-		protected int setOption(String name, double price_) {
-			optionList.add(new Option(name, price_));
+		/*
+		 * add an option
+		 * 
+		 * @param optionName option name
+		 * 
+		 * @param optionPrice option price
+		 */
+		protected int addOption(String optionName, double optionPrice) {
+			optionList.add(new Option(optionName, optionPrice));
 			return optionList.size();
 		}
 
@@ -317,7 +418,11 @@ public class Automobile implements java.io.Serializable {
 			stringBufferObject = new StringBuffer("");
 			stringBufferObject.append(getName()).append(": ");
 			for (i = 0; i < n; i++) {
-				stringBufferObject.append(getOption(i).toString());
+				try {
+					stringBufferObject.append(getOption(i).toString());
+				} catch (AutoException e) {
+					// nothing
+				}
 				if (i < n - 1) {
 					stringBufferObject.append(", ");
 				}

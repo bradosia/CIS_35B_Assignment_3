@@ -31,7 +31,7 @@ public class AutoException extends Exception {
 		errorMessageTable = new LinkedHashMap<Integer, String>(128);
 		errorMessageTable.put(0, "Unknown Problem");
 
-		errorMessageTable.put(1000, "Missing name attribute for option set in the automobile text file");
+		errorMessageTable.put(100, "Missing name attribute for option set in the automobile text file");
 		errorMessageTable.put(101, "Missing options attribute for option set in the automobile text file");
 		errorMessageTable.put(102, "Missing name attribute for option in the automobile text file");
 		errorMessageTable.put(103, "Missing price attribute for option in the automobile text file");

@@ -37,7 +37,7 @@ public class FileIO {
 					if (optionSetName.equals("")) {
 						throw new exception.AutoException(100);
 					} else {
-						optionSetObjectIndex = autoObj.setOptionSet(optionSetName);
+						optionSetObjectIndex = autoObj.addOptionSet(optionSetName);
 					}
 					if (optionSetOptions.equals("")) {
 						throw new exception.AutoException(101);
@@ -68,10 +68,10 @@ public class FileIO {
 							if (optionPrice.equals("")) {
 								new exception.AutoException(103, true); // warning
 							}
-							autoObj.setOptionSetOption(optionSetObjectIndex, optionName,
+							autoObj.addOptionSetOption(optionSetObjectIndex, optionName,
 									Double.parseDouble(optionPrice));
 						} else {
-							autoObj.setOptionSetOption(optionSetObjectIndex, optionPart.trim(), 0);
+							autoObj.addOptionSetOption(optionSetObjectIndex, optionPart.trim(), 0);
 						}
 					} else {
 						new exception.AutoException(102, true); // warning
