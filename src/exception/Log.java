@@ -1,70 +1,60 @@
 package exception;
 
 import java.util.Date;
-import java.util.logging.*;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class Log {
-	Logger logger;
-	FileHandler fh;
+	PrintWriter writer;
 
 	public Log() {
-		logger = Logger.getLogger("MyLog");
-		// logger.setUseParentHandlers(false);
+		// nothing
 	}
 
 	public void error(String str) {
 		try {
-			// configure the logger with handler and formatter
-			fh = new FileHandler("log.txt", true);
-			logger.addHandler(fh);
-			SimpleFormatter formatter = new SimpleFormatter();
-			fh.setFormatter(formatter);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		logger.warning(str);
-		try {
-			if (fh != null) {
-				fh.close();
-			}
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void warning(String str) {
-		/*try {
 			DateFormat d1 = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
 			Date date = new Date();
 			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("log.txt")));
-			writer.println("[" + d1.format(date) + "] " + errlog);
+			writer.println("[" + d1.format(date) + "] ERROR: " + str);
 			writer.close();
-		} catch(IOException e) {
-			
-		}*/
-		try {
-			// configure the logger with handler and formatter
-			fh = new FileHandler("log.txt", true);
-			logger.addHandler(fh);
-			SimpleFormatter formatter = new SimpleFormatter();
-			fh.setFormatter(formatter);
+		} catch (FileNotFoundException e) {
+			// nothing
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			// nothing
 		} catch (IOException e) {
-			e.printStackTrace();
+			// nothing
 		}
-		logger.warning(str);
 		try {
-			if (fh != null) {
-				fh.close();
+			if (writer != null) {
+				writer.close();
 			}
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			// nothing
+		}
+	}
+
+	public void warning(String str) {
+		try {
+			DateFormat d1 = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+			Date date = new Date();
+			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("log.txt")));
+			writer.println("[" + d1.format(date) + "] WARNING: " + str);
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// nothing
+		} catch (SecurityException e) {
+			// nothing
+		} catch (IOException e) {
+			// nothing
+		}
+		try {
+			if (writer != null) {
+				writer.close();
+			}
+		} catch (SecurityException e) {
+			// nothing
 		}
 	}
 }

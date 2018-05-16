@@ -12,19 +12,17 @@ import model.Automobile;
 import exception.AutoException;
 
 public class FileIO {
-	/*
-	 * File pattern: newline (\n) separates different optionSet colon ":" separates
+	/* File pattern: newline (\n) separates different optionSet colon ":" separates
 	 * optionSetName and optionSetOptions optionSetOptions may span multiple lines
 	 * as long as no new optionSetName is found comma "," separates different
-	 * optionSetOptions slash "/" separates different option values
-	 */
+	 * optionSetOptions slash "/" separates different option values */
 	public boolean read(String fileName, Automobile autoObj) throws AutoException {
 		boolean returnValue = false;
-		String optionSetOptions, optionSetName, lineNext, optionName, optionPrice;
-		String[] optionParts;
+		String optionSetOptions, optionSetName, lineNext;
 
 		BufferedReader reader = null;
 		int optionSetObjectIndex = -1;
+		optionSetName = optionSetOptions = null;
 
 		try {
 			reader = new BufferedReader(new FileReader(new File(fileName)));
@@ -34,48 +32,25 @@ public class FileIO {
 					String[] optionSetParts = lineNext.split(":");
 					optionSetName = optionSetParts[0].trim();
 					optionSetOptions = optionSetParts[1].trim();
-					if (optionSetName.equals("")) {
-						throw new exception.AutoException(100);
-					} else {
+					try {
 						optionSetObjectIndex = autoObj.addOptionSet(optionSetName);
-					}
-					if (optionSetOptions.equals("")) {
-						throw new exception.AutoException(101);
+					} catch (AutoException e) {
+						optionSetObjectIndex = -1;
 					}
 				} else {
-					/*
-					 * whole line is options if the optionSetName not found This allows options to
-					 * be split on multiple lines for file readability.
-					 */
+					/* whole line is options if the optionSetName not found This allows options to
+					 * be split on multiple lines for file readability. */
 					optionSetOptions = lineNext;
 				}
-				// optionSet options
-				if (optionSetOptions.indexOf(',') != -1 && optionSetObjectIndex != -1) {
-					optionParts = optionSetOptions.split(",");
-				} else {
-					optionParts = new String[] { optionSetOptions };
-				}
-				for (String optionPart : optionParts) {
-					// part not blank
-					if (optionPart.trim().length() > 0) {
-						if (optionPart.indexOf('/') != -1) {
-							String[] optionValueParts = optionPart.split("/");
-							optionName = optionValueParts[0].trim();
-							optionPrice = optionValueParts[1].trim();
-							if (optionName.equals("")) {
-								new exception.AutoException(102, true); // warning
-							}
-							if (optionPrice.equals("")) {
-								new exception.AutoException(103, true); // warning
-							}
-							autoObj.addOptionSetOption(optionSetObjectIndex, optionName,
-									Double.parseDouble(optionPrice));
-						} else {
-							autoObj.addOptionSetOption(optionSetObjectIndex, optionPart.trim(), 0);
-						}
-					} else {
-						new exception.AutoException(102, true); // warning
+				if (optionSetObjectIndex != -1) {
+					try {
+						optionSetOptionsProcess(autoObj, optionSetObjectIndex, optionSetOptions);
+					} catch (AutoException e) {
+						optionSetObjectIndex = -1;
 					}
+				} else if (optionSetName != null && !optionSetName.equals("") && optionSetOptions != null
+					&& !optionSetOptions.equals("")) {
+					autoObj.setOptionSetOptionNameReserved(optionSetName, optionSetOptions);
 				}
 			}
 			returnValue = true;
@@ -93,6 +68,43 @@ public class FileIO {
 			}
 		}
 		return returnValue;
+	}
+
+	private boolean optionSetOptionsProcess(Automobile autoObj, int optionSetObjectIndex, String optionSetOptions)
+		throws AutoException {
+		if (optionSetOptions.equals("")) {
+			throw new exception.AutoException(101);
+		}
+		String optionName, optionPrice;
+		String[] optionParts;
+		// optionSet options
+		if (optionSetOptions.indexOf(',') != -1 && optionSetObjectIndex != -1) {
+			optionParts = optionSetOptions.split(",");
+		} else {
+			optionParts = new String[] { optionSetOptions };
+		}
+		for (String optionPart : optionParts) {
+			// part not blank
+			if (optionPart.trim().length() > 0) {
+				if (optionPart.indexOf('/') != -1) {
+					String[] optionValueParts = optionPart.split("/");
+					optionName = optionValueParts[0].trim();
+					optionPrice = optionValueParts[1].trim();
+					if (optionName.equals("")) {
+						new exception.AutoException(102, true); // warning
+					}
+					if (optionPrice.equals("")) {
+						new exception.AutoException(103, true); // warning
+					}
+					autoObj.addOptionSetOption(optionSetObjectIndex, optionName, Double.parseDouble(optionPrice));
+				} else {
+					autoObj.addOptionSetOption(optionSetObjectIndex, optionPart.trim(), 0);
+				}
+			} else {
+				new exception.AutoException(102, true); // warning
+			}
+		}
+		return false;
 	}
 
 	public boolean serialize(String fileName, Automobile autoObj) throws AutoException {
@@ -126,9 +138,7 @@ public class FileIO {
 		return autoObj;
 	}
 
-	/*
-	 * print() and toString()
-	 */
+	/* print() and toString() */
 	public void print() {
 		System.out.print(toString());
 	}

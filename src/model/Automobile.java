@@ -11,41 +11,46 @@ import java.util.*;
 
 import exception.AutoException;
 
+/** @class Automobile
+ *        The generic automobile container containing possible option sets and
+ *        options. \n
+ *        Also contains option choices. **/
 public class Automobile implements java.io.Serializable {
 	private static final long serialVersionUID = 1362422403381823640L;
-	private String makeName, modelName, packageName, typeName, year;
+	private String makeName, modelName, year;
 	private int key; // make-model-year
 	private double basePrice; // double is not an exact decimal.
 	ArrayList<OptionSet> optionSetList;
-	ArrayList<Integer> optionSetOptionSelect;
+	ArrayList<Integer> optionSetOptionChoice;
+	ArrayList<String> optionSetNameReserved;
 
-	/*
-	 * Constructor
-	 */
+	/* Constructor */
 	public Automobile() {
 		init();
 		optionSetList = new ArrayList<OptionSet>();
-		optionSetOptionSelect = new ArrayList<Integer>();
+		optionSetOptionChoice = new ArrayList<Integer>();
 	}
 
 	public Automobile(int size) {
 		init();
 		optionSetList = new ArrayList<OptionSet>(20);
-		optionSetOptionSelect = new ArrayList<Integer>(20);
+		optionSetOptionChoice = new ArrayList<Integer>(20);
 	}
 
 	public void init() {
 		makeName = "";
 		modelName = "";
-		packageName = "";
-		typeName = "";
 		year = "";
 		basePrice = 0;
+		/* These option set names are reserved for automobile attribute names. */
+		optionSetNameReserved = new ArrayList<String>();
+		optionSetNameReserved.add("Make");
+		optionSetNameReserved.add("Model");
+		optionSetNameReserved.add("Year");
+		optionSetNameReserved.add("Retail Price");
 	}
 
-	/*
-	 * Getter
-	 */
+	/* Getter */
 	// Get Name of Automotive
 	public String getMake() {
 		return makeName;
@@ -65,10 +70,14 @@ public class Automobile implements java.io.Serializable {
 	}
 
 	// Get OptionSet (by index value)
-	public OptionSet getOptionSet(int index) {
+
+	/** get optionSet object by index
+	 * @param OptionSetIndex optionSet index
+	 * @return OptionSet object if found and null if not */
+	private OptionSet getOptionSet(int OptionSetIndex) {
 		OptionSet optionSetObject = null;
 		try {
-			optionSetObject = optionSetList.get(index);
+			optionSetObject = optionSetList.get(OptionSetIndex);
 		} catch (ArrayIndexOutOfBoundsException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -81,125 +90,193 @@ public class Automobile implements java.io.Serializable {
 		return optionSetList.size();
 	}
 
-	public OptionSet.Option getOptionSetOptionChoice(String optionSetName) {
-		OptionSet.Option returnValue = null;
+	public String getOptionSetOptionChoiceName(String optionSetName) {
+		String returnValue = null;
+		OptionSet.Option optionObject = null;
 		int optionSetIndex;
 		try {
 			optionSetIndex = findOptionSetIndex(optionSetName);
-			returnValue = getOptionSetOption(optionSetIndex);
+			optionObject = getOptionSetOptionChoicebyIndex(optionSetIndex);
 		} catch (exception.AutoException e) {
 			// nothing
+		}
+		if (optionObject != null) {
+			return optionObject.getName();
 		}
 		return returnValue;
 	}
 
-	public OptionSet.Option getOptionSetOption(int optionSetIndex) throws AutoException {
+	/** Get the optionSet option choice by index
+	 * @param optionSetIndex optionSet index
+	 * @return null if not found and option object if found */
+	private OptionSet.Option getOptionSetOptionChoicebyIndex(int optionSetIndex) throws AutoException {
 		OptionSet.Option returnValue = null;
 		int optionIndex;
 		try {
-			optionIndex = optionSetOptionSelect.get(optionSetIndex).intValue();
+			optionIndex = optionSetOptionChoice.get(optionSetIndex).intValue();
 			returnValue = getOptionSet(optionSetIndex).getOption(optionIndex);
+		} catch (IndexOutOfBoundsException e) {
+			throw new exception.AutoException(102);
 		} catch (NullPointerException e) {
 			throw new exception.AutoException(102);
 		}
 		return returnValue;
 	}
 
-	/*
-	 * Find
-	 */
-	// Find OptionSet with name
-	public OptionSet findOptionSet(String name) {
-		OptionSet optionSetObject = null;
-		for (int i = 0; i < optionSetList.size(); i++) {
-			if (optionSetList.get(i).getName() == name) {
-				optionSetObject = optionSetList.get(i);
+	/** Get the optionSet option name by name
+	 * @param optionSetName optionSet name
+	 * @param optionName option name
+	 * @return null if reserved or not found and option name if found */
+	public String getOptionSetOptionName(String optionSetName, String optionName) {
+		String returnValue = null;
+		OptionSet optionSetObject = findOptionSet(optionSetName);
+		if (optionSetObject != null) {
+			// First check reserved attributes then the get optionSet option if not reserved
+			if (!isOptionSetReserved(optionSetObject)) {
+				OptionSet.Option optionObject = optionSetObject.findOption(optionName);
+				if (optionObject != null) {
+					returnValue = optionObject.getName();
+				}
 			}
+		}
+		return returnValue;
+	}
+
+	/** Get the optionSet option price by name
+	 * @param optionSetName optionSet name
+	 * @param optionName option name
+	 * @return null if reserved or not found and option price if found */
+	public Double getOptionSetOptionPrice(String optionSetName, String optionName) {
+		Double returnValue = null;
+		OptionSet optionSetObject = findOptionSet(optionSetName);
+		if (optionSetObject != null) {
+			// First check reserved attributes then the get optionSet option if not reserved
+			if (!isOptionSetReserved(optionSetObject)) {
+				OptionSet.Option optionObject = optionSetObject.findOption(optionName);
+				if (optionObject != null) {
+					returnValue = optionObject.getPrice();
+				}
+			}
+		}
+		return returnValue;
+	}
+
+	/** Is the automobile attributes from the reserved attribute list
+	 * @param optionSetObject optionSet object
+	 * @param optionName option name (automobile attribute value)
+	 * @return true if reserved and false in not */
+	public boolean isOptionSetReserved(OptionSet optionSetObject) {
+		boolean returnValue = false;
+		if (optionSetObject != null) {
+			if (isOptionSetNameReserved(optionSetObject.getName())) {
+				returnValue = true;
+			}
+		}
+		return returnValue;
+	}
+
+	/** Is the optionSet name from the reserved optionSet name list
+	 * @param optionSetName optionSet name
+	 * @return true if reserved and false in not */
+	public boolean isOptionSetNameReserved(String optionSetName) {
+		boolean returnValue = false;
+		if (optionSetNameReserved.contains(optionSetName)) {
+			returnValue = true;
+		}
+		return returnValue;
+	}
+
+	/* Find */
+	/** find optionSet object by name
+	 * @param optionSetName optionSet name
+	 * @return OptionSet object if found and null if not */
+	private OptionSet findOptionSet(String optionSetName) {
+		OptionSet optionSetObject = null;
+		int optionSetIndex = findOptionSetIndex(optionSetName);
+		if (optionSetIndex != -1) {
+			optionSetObject = getOptionSet(optionSetIndex);
 		}
 		return optionSetObject;
 	}
 
-	public OptionSet.Option findOptionSetOption(String optionSetName, String optionName) {
+	private OptionSet.Option findOptionSetOption(String optionSetName, String optionName) {
 		OptionSet.Option optionObject = null;
 		OptionSet optionSetObject = findOptionSet(optionSetName);
 		if (optionSetObject != null) {
-			optionObject = optionSetObject.findOptionSet(optionName);
+			optionObject = optionSetObject.findOption(optionName);
 		}
 		return optionObject;
 	}
 
-	public int findOptionSetIndex(String name) throws AutoException {
-		int i, n;
+	/** find the optionSet by name and Option by name
+	 * @param OptionSetName optionSet name
+	 * @return -1 if not found and option set index position if found **/
+	public int findOptionSetIndex(String optionSetName) {
+		int returnValue, i, n;
+		returnValue = -1;
 		n = optionSetList.size();
 		for (i = 0; i < n; i++) {
-			if (optionSetList.get(i).getName() == name) {
+			if (optionSetList.get(i).getName() == optionSetName) {
+				returnValue = i;
 				break;
 			}
 		}
-		if (i == n) {
-			throw new exception.AutoException(102);
-		}
-		return i;
+		return returnValue;
 	}
 
+	/** find the optionSet by name and Option by name
+	 * @param OptionSetName optionSet name
+	 * @param optionName option name
+	 * @return -1 if not found and option index position if found **/
 	public int findOptionSetOptionIndex(String optionSetName, String optionName) {
 		int returnIndex = -1;
 		OptionSet optionSetObject = findOptionSet(optionSetName);
 		if (optionSetObject != null) {
-			returnIndex = optionSetObject.findOptionSetIndex(optionName);
+			returnIndex = optionSetObject.findOptionIndex(optionName);
 		}
 		return returnIndex;
 	}
 
-	/*
-	 * add new optionSet
-	 * 
+	/** Add new optionSet
 	 * @param OptionSetName optionSet name
-	 */
-	public int addOptionSet(String OptionSetName) {
-		optionSetList.add(new OptionSet(OptionSetName, 10));
-		return length();
+	 * @return -1 on failure and index position on success
+	 * @throws AutoException **/
+	public int addOptionSet(String OptionSetName) throws AutoException {
+		if (OptionSetName.equals("")) {
+			throw new exception.AutoException(100);
+		}
+		int returnValue = -1;
+		if (!isOptionSetNameReserved(OptionSetName)) {
+			if (optionSetList.add(new OptionSet(OptionSetName, 10))) {
+				returnValue = optionSetList.size() - 1;
+			}
+		}
+		return returnValue;
 	}
 
-	/*
-	 * Add option by optionSet Index
-	 * 
+	/** Add option by optionSet Index
 	 * @post option added
-	 * 
 	 * @param optionSetIndex optionSet index
-	 * 
 	 * @param optionName name of added option
-	 * 
 	 * @param optionPrice price of added option
-	 */
+	 * @return -1 if option set reserved and option index position if option
+	 *         added **/
 	public int addOptionSetOption(int optionSetIndex, String optionName, double optionPrice) {
 		int indexReturn = -1;
 		OptionSet optionSetObject = getOptionSet(optionSetIndex);
-		indexReturn = optionSetObject.addOption(optionName, optionPrice);
-		// we set the
-		if (optionSetObject.getName().equals("Make")) {
-			setMake(optionName);
-		} else if (optionSetObject.getName().equals("Model")) {
-			setModel(optionName);
-		} else if (optionSetObject.getName().equals("Year")) {
-			setYear(optionName);
-		} else if (optionSetObject.getName().equals("Retail Price")) {
-			/*
-			 * Price may be set by either Retail Price: 18445 or Retail Price: /18445
-			 */
-			if (optionName.equals("")) {
-				setPrice(optionPrice);
-			} else {
-				setPrice(Double.parseDouble(optionName));
+		if (optionSetObject != null) {
+			// First set reserved attributes then the optionSet option if not reserved
+			if (!setOptionSetOptionNameReserved(optionSetObject.getName(), optionName)) {
+				indexReturn = optionSetObject.addOption(optionName, optionPrice);
 			}
 		}
 		return indexReturn;
 	}
 
-	/*
-	 * Setter
-	 */
-	// SetName
+	/* Setter */
+	/** Set make name
+	 * @post make name set
+	 * @param name make name **/
 	public void setMake(String name) {
 		makeName = name;
 	}
@@ -227,24 +304,70 @@ public class Automobile implements java.io.Serializable {
 		return returnValue;
 	}
 
-	/*
-	 * Set option set option name
-	 */
+	/** Sets the automobile attributes from the reserved attribute list
+	 * @param optionSetObject optionSet object
+	 * @param optionName option name (automobile attribute value)
+	 * @return true if reserved and false in not */
+	public boolean setOptionSetOptionNameReserved(String optionSetName, String optionName) {
+		boolean returnValue = false;
+		if (optionSetNameReserved.contains(optionSetName)) {
+			returnValue = true;
+		}
+		if (optionSetName.equals("Make")) {
+			setMake(optionName);
+		} else if (optionSetName.equals("Model")) {
+			setModel(optionName);
+		} else if (optionSetName.equals("Year")) {
+			setYear(optionName);
+		} else if (optionSetName.equals("Retail Price")) {
+			setPrice(Double.parseDouble(optionName));
+		}
+		return returnValue;
+	}
+
+	/** Sets the option name in an option set by name
+	 * @param optionSetObject optionSet name
+	 * @param optionName option name
+	 * @param optionName option new name (automobile attribute value)
+	 * @return true if reserved or option set and false in not found */
 	public boolean setOptionSetOptionName(String optionSetName, String optionName, String nameNew) {
 		boolean returnValue = false;
-		OptionSet.Option optionObject = findOptionSetOption(optionSetName, optionName);
-		if (optionObject != null) {
-			optionObject.setName(optionName);
+		// First set reserved attributes then the optionSet option if not reserved
+		if (!setOptionSetOptionNameReserved(optionSetName, nameNew)) {
+			OptionSet optionSetObject = findOptionSet(optionSetName);
+			if (optionSetObject != null) {
+				// not reserved option set name
+				OptionSet.Option optionObject = optionSetObject.findOption(optionName);
+				if (optionObject != null) {
+					optionObject.setName(nameNew);
+					returnValue = true;
+				}
+			}
+		} else {
 			returnValue = true;
 		}
 		return returnValue;
 	}
 
+	/** Sets the option price in an option set by name
+	 * @param optionSetObject optionSet name
+	 * @param optionName option name
+	 * @param optionName option new price (automobile attribute value)
+	 * @return true if reserved or option set and false in not found */
 	public boolean setOptionSetOptionPrice(String optionSetName, String optionName, double priceNew) {
 		boolean returnValue = false;
-		OptionSet.Option optionObject = findOptionSetOption(optionSetName, optionName);
-		if (optionObject != null) {
-			optionObject.setPrice(priceNew);
+		// First set reserved attributes then the optionSet option if not reserved
+		if (!setOptionSetOptionNameReserved(optionSetName, Double.toString(priceNew))) {
+			OptionSet optionSetObject = findOptionSet(optionSetName);
+			if (optionSetObject != null) {
+				// not reserved option set name
+				OptionSet.Option optionObject = optionSetObject.findOption(optionName);
+				if (optionObject != null) {
+					optionObject.setPrice(priceNew);
+					returnValue = true;
+				}
+			}
+		} else {
 			returnValue = true;
 		}
 		return returnValue;
@@ -253,7 +376,8 @@ public class Automobile implements java.io.Serializable {
 	public boolean setOptionSetOption(int optionSetIndex, int optionIndex) throws AutoException {
 		boolean returnValue = false;
 		try {
-			optionSetOptionSelect.set(optionSetIndex, optionIndex);
+			optionSetOptionChoice.set(optionSetIndex, optionIndex);
+			returnValue = true;
 		} catch (IndexOutOfBoundsException e) {
 			throw new exception.AutoException(100);
 		}
@@ -274,9 +398,7 @@ public class Automobile implements java.io.Serializable {
 		return returnValue;
 	}
 
-	/*
-	 * print() and toString()
-	 */
+	/* print() and toString() */
 	public void print() {
 		System.out.print(toString());
 	}
@@ -286,8 +408,8 @@ public class Automobile implements java.io.Serializable {
 		int i, n;
 		n = length();
 		stringBufferObject = new StringBuffer("");
-		stringBufferObject.append("Year, Make, Model: ").append(getYear()).append(", ").append(getMake()).append(", ")
-				.append(getModel()).append(" and Base Price: $").append(getPrice());
+		stringBufferObject.append("Year Make Model: ").append(getYear()).append(" ").append(getMake()).append(" ")
+			.append(getModel()).append(" with Base Price: $").append(getPrice());
 		stringBufferObject.append(System.getProperty("line.separator"));
 		for (i = 0; i < n; i++) {
 			stringBufferObject.append(optionSetList.get(i).toString()).append(System.getProperty("line.separator"));
@@ -300,9 +422,7 @@ public class Automobile implements java.io.Serializable {
 		ArrayList<Option> optionList;
 		private String optionSetName;
 
-		/*
-		 * Constructor
-		 */
+		/* Constructor */
 		protected OptionSet() {
 			init();
 			optionList = new ArrayList<Option>();
@@ -318,16 +438,12 @@ public class Automobile implements java.io.Serializable {
 			optionSetName = "";
 		}
 
-		/*
-		 * Getter
-		 */
+		/* Getter */
 		protected String getName() {
 			return optionSetName;
 		}
 
-		/*
-		 * get option by option index
-		 */
+		/* get option by option index */
 		protected Option getOption(int optionIndex) throws AutoException {
 			Option optionObject = null;
 			try {
@@ -342,71 +458,63 @@ public class Automobile implements java.io.Serializable {
 			return optionList.size();
 		}
 
-		/*
-		 * Find
-		 */
-		// Find Option with name (in context of OptionSet)
-		protected Option findOptionSet(String name) {
+		/** Find option by name
+		 * @param optionName option name
+		 * @return null if not found and option object if found */
+		protected Option findOption(String optionName) {
 			Option optionObject = null;
 			for (int i = 0; i < optionList.size(); i++) {
 				try {
-					if (optionList.get(i).getName() == name) {
+					if (optionList.get(i).getName() == optionName) {
 						optionObject = optionList.get(i);
 					}
 				} catch (NullPointerException e) {
-					/*
-					 * According to Carnegie Mellon University Software Engineering Institute You
+					/* According to Carnegie Mellon University Software Engineering Institute You
 					 * should not catch a null pointer exception. BUT WE WILL FOR THE SAKE OF THE
-					 * ASSIGNMENT!
-					 */
+					 * ASSIGNMENT! */
 					break;
 				}
 			}
 			return optionObject;
 		}
 
-		protected int findOptionSetIndex(String name) {
-			int i, n;
+		/** Find option by name
+		 * @param optionName option name
+		 * @return -1 if not found and position index if found */
+		protected int findOptionIndex(String optionName) {
+			int returnValue, i, n;
+			returnValue = -1;
 			n = optionList.size();
 			for (i = 0; i < n; i++) {
 				try {
-					if (optionList.get(i).getName() == name) {
+					if (optionList.get(i).getName() == optionName) {
+						returnValue = i;
 						break;
 					}
 				} catch (NullPointerException e) {
-					/*
-					 * According to Carnegie Mellon University Software Engineering Institute You
+					/* According to Carnegie Mellon University Software Engineering Institute You
 					 * should not catch a null pointer exception. BUT WE WILL FOR THE SAKE OF THE
-					 * ASSIGNMENT!
-					 */
+					 * ASSIGNMENT! */
 					break;
 				}
 			}
-			return i;
+			return returnValue;
 		}
 
-		/*
-		 * Setter
-		 */
+		/* Setter */
 		protected void setName(String name) {
 			optionSetName = name;
 		}
 
-		/*
-		 * add an option
-		 * 
+		/** add an option
 		 * @param optionName option name
-		 * 
-		 * @param optionPrice option price
-		 */
+		 * @param optionPrice option price **/
 		protected int addOption(String optionName, double optionPrice) {
 			optionList.add(new Option(optionName, optionPrice));
 			return optionList.size();
 		}
 
-		/*
-		 * print() and toString()
-		 */
+		/* print() and toString() */
 		public void print() {
 			System.out.print(toString());
 		}
@@ -435,9 +543,7 @@ public class Automobile implements java.io.Serializable {
 			private String optionName;
 			private double price;
 
-			/*
-			 * Constructor
-			 */
+			/* Constructor */
 			protected Option() {
 				optionName = "";
 				price = 0;
@@ -448,9 +554,7 @@ public class Automobile implements java.io.Serializable {
 				price = price_;
 			}
 
-			/*
-			 * Getter
-			 */
+			/* Getter */
 			protected String getName() {
 				return optionName;
 			}
@@ -459,9 +563,7 @@ public class Automobile implements java.io.Serializable {
 				return price;
 			}
 
-			/*
-			 * Setter
-			 */
+			/* Setter */
 			protected void setName(String name) {
 				optionName = name;
 			}
@@ -470,9 +572,7 @@ public class Automobile implements java.io.Serializable {
 				price = price_;
 			}
 
-			/*
-			 * print() and toString()
-			 */
+			/* print() and toString() */
 			public void print() {
 				System.out.print(toString());
 			}

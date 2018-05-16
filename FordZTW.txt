@@ -1,7 +1,5 @@
 Make: Ford
-Model: Focus
-Package: ZTW
-Type: Wagon
+Model: Wagon ZTW
 Year: 2018
 Retail Price: 18445
 Color: Fort Knox Gold Clearcoat Metallic /0, Liquid Grey Clearcoat Metallic /0, 
