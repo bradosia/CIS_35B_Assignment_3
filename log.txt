@@ -1,1 +1,0 @@
-[05/15/18 20:18:10] ERROR: #500: Automobile added conficts with another automobile
