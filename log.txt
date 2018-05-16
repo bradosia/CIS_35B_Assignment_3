@@ -1,0 +1,12 @@
+[05/15/18 22:32:11] WARNING #102: Missing name attribute for option in the automobile text file
+[05/15/18 22:32:11] WARNING #102: Missing name attribute for option in the automobile text file
+[05/15/18 22:32:11] WARNING #102: Missing name attribute for option in the automobile text file
+[05/15/18 22:32:11] ERROR #500: Automobile added conficts with another automobile
+[05/15/18 22:32:11] ERROR #500: Automobile added conficts with another automobile
+[05/15/18 22:32:11] WARNING #102: Missing name attribute for option in the automobile text file
+[05/15/18 22:32:11] WARNING #102: Missing name attribute for option in the automobile text file
+[05/15/18 22:32:11] WARNING #102: Missing name attribute for option in the automobile text file
+[05/15/18 22:32:11] ERROR #500: Automobile added conficts with another automobile
+[05/15/18 22:32:11] ERROR #500: Automobile added conficts with another automobile
+[05/15/18 22:32:11] ERROR #500: Automobile added conficts with another automobile
+[05/15/18 22:32:11] ERROR #500: Automobile added conficts with another automobile
